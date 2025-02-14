@@ -38,7 +38,6 @@ export default function VoiceRecorder() {
       {error && <p className="text-red-500 mt-2">{error}</p>}
       {transcript && (
         <div className="mt-4">
-          <h3>Transcript:</h3>
           <p>{transcript}</p>
         </div>
       )}

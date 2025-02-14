@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+const BASE_URL = 'http://localhost:3001/';
+
 const openai = new OpenAI({ 
   apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
   dangerouslyAllowBrowser: true
@@ -38,7 +40,7 @@ export class VoiceToTextService {
         return new Promise((resolve, reject) => {
             try {
                 this.mediaRecorder.onstop = async () => {
-                    const audioBlob = new Blob(this.audioChunks, { type: 'audio/mpeg' });
+                    const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
                     resolve(audioBlob);
                 };
                 this.mediaRecorder.stop();
@@ -49,16 +51,21 @@ export class VoiceToTextService {
     };
     
     transcribe = async (audioBlob) => {
-        try {
-            const formData = new FormData();
-      formData.append('file', audioBlob, 'audio.mp3');
-      
-      const transcription = await openai.audio.transcriptions.create({
-          file: formData.get('file'),
-          model: "whisper-1",
+    try {
+        const formData = new FormData();
+        formData.append('file', audioBlob, 'audio.webm');
+
+        const response = await fetch(`${BASE_URL}api/voicetotext`, {
+            method: 'POST',
+            body: formData,
         });
-        
-        return transcription.text;
+
+        if (!response.ok) {
+            throw new Error(`Network error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data.text;
     } catch (error) {
         throw error;
     }
