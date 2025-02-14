@@ -8,6 +8,7 @@ export default function VoiceRecorder() {
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [error, setError] = useState('');
+  const [audio, setAudio] = useState(null);
   // For simplicity, we use a single thread. In a production app, you may want to create a thread using /api/thread.
   const [threadId, setThreadId] = useState(null);
 
@@ -76,11 +77,19 @@ export default function VoiceRecorder() {
         
         // 4. Play the generated audio automatically in the browser
         const audio = new Audio(audioUrl);
+        setAudio(audio);
         audio.play();
       }
     } catch (err) {
       setError(err.message);
       setIsRecording(false);
+    }
+  };
+
+  const handleStopAudio = () => {
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
     }
   };
 
@@ -93,6 +102,15 @@ export default function VoiceRecorder() {
         {isRecording ? 'Stop Recording' : 'Start Recording'}
       </button>
       
+      {audio && (
+        <button 
+          onClick={handleStopAudio}
+          className="bg-[#cf4343] text-white px-28 py-7 text-lg rounded-lg shadow-md hover:bg-red-600 font-bold transition mt-4"
+        >
+          Stop Audio
+        </button>
+      )}
+
       {error && <p className="text-red-500 mt-2">{error}</p>}
       {transcript && (
         <div className="mt-4">

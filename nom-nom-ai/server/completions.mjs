@@ -4,6 +4,7 @@ import OpenAI from 'openai';
 import multer from 'multer';
 import fs from 'fs';
 import cors from 'cors';
+import "dotenv/config"
 
 const upload = multer({ dest: 'uploads/' });
 
