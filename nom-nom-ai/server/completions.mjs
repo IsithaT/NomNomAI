@@ -1,14 +1,19 @@
 import express from 'express';
 import OpenAI from 'openai';
+import multer from 'multer';
+import fs from 'fs';
+import cors from 'cors';
 
+const upload = multer({ dest: 'uploads/' });
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 
+app.use(cors()); // Add this line before other middleware
 app.use(express.json());
 
 // Store the assistant ID after creation
@@ -123,6 +128,36 @@ app.post('/api/chat', async (req, res) => {
     });
   }
 });
+
+
+app.post('/api/voicetotext', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No file uploaded.' });
+    }
+
+    // Assign the original filename to the file stream so the API correctly registers the extension.
+    const fileStream = Object.assign(fs.createReadStream(req.file.path), { filename: req.file.originalname });
+
+    const transcript = await openai.audio.transcriptions.create({
+      file: fileStream,
+      model: "whisper-1"
+    });
+
+    res.json({ success: true, text: transcript.text });
+  } catch (error) {
+    console.error('Error transcribing audio:', error);
+    res.status(500).json({ success: false, error: error.message });
+  } finally {
+    // Clean up the temporary file from disk
+    if (req.file?.path) {
+      fs.unlink(req.file.path, err => {
+        if (err) console.error('Error deleting temporary file:', err);
+      });
+    }
+  }
+});
+
 
 // Initialize the assistant and start the server
 initializeAssistant()
