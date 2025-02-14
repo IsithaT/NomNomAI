@@ -73,7 +73,7 @@ export default function Home() {
         {/* PDF Viewer using iframe */}
         {pdfUrl && (
           <div className="bg-[#d6b285] p-4 mt-4 rounded-lg shadow-md max-w-3xl w-full">
-            <h2 className="text-[#437dcf] font-bold text-2xl">Your Recipe:</h2>
+            <h2 className="text-white font-bold text-2xl">Your Recipe:</h2>
             <iframe
               src={pdfUrl}
               width="100%"
