@@ -113,9 +113,13 @@ export default function VoiceRecorder() {
 
       {error && <p className="text-red-500 mt-2">{error}</p>}
       {transcript && (
-        <div className="mt-4">
-          <p>{transcript}</p>
-        </div>
+        <div className="mt-4 bg-white border border-[#437dcf] rounded-lg p-6 max-w-2xl shadow-lg overflow-y-auto max-h-96 text-[#437dcf] font-bold space-y-2 mx-auto">
+        {transcript.split("\n").map((line, index) => (
+          <p key={index} className={line.startsWith("-") || line.startsWith("•") ? "ml-4 list-disc" : ""}>
+            {line}
+          </p>
+        ))}
+      </div>
       )}
     </div>
   );
