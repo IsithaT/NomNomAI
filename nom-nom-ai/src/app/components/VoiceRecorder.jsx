@@ -30,7 +30,7 @@ export default function VoiceRecorder() {
     <div>
       <button 
         onClick={handleVoiceRecording}
-        className="px-4 py-2 bg-blue-500 text-white rounded"
+        className="bg-[#437dcf] text-white px-28 py-7 text-lg rounded-lg shadow-md hover:bg-blue-600 font-bold transition"
       >
         {isRecording ? 'Stop Recording' : 'Start Recording'}
       </button>
