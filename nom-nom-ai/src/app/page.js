@@ -1,6 +1,8 @@
 "use client";
 import Image from "next/image";
 import { useState } from "react";
+import "./App.css";
+import VoiceRecorder from "./components/VoiceRecorder";
 import { getDocument } from "pdfjs-dist/webpack"; // Import pdf.js
 import "./App.css"
 
@@ -85,9 +87,8 @@ export default function Home() {
 
         
         {/* Button in the Center */}
-        <button className="bg-[#437dcf] text-white px-28 py-7 text-lg rounded-lg shadow-md hover:bg-blue-600 font-bold transition">
-          Tap to Speak!
-        </button>
+        <VoiceRecorder/>
+        
       </div>
     </section>
   );
