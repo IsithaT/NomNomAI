@@ -2,6 +2,8 @@
 import Image from "next/image";
 import { useState } from "react";
 import "./App.css";
+import VoiceRecorder from "./components/VoiceRecorder";
+
 
 export default function Home() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -40,9 +42,8 @@ export default function Home() {
         </section>
 
         {/* Button in the Center */}
-        <button className="bg-[#437dcf] text-white px-28 py-7 text-lg rounded-lg shadow-md hover:bg-blue-600 font-bold transition">
-          Tap to Speak!
-        </button>
+        <VoiceRecorder/>
+        
       </div>
     </section>
   );

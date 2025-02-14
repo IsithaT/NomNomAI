@@ -158,6 +158,31 @@ app.post('/api/voicetotext', upload.single('file'), async (req, res) => {
   }
 });
 
+app.post('/api/texttomp3', async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text || text.trim() === '') {
+      return res.status(400).json({ success: false, error: 'No text provided' });
+    }
+
+    // Generate the audio using OpenAI's speech synthesis
+    const mp3 = await openai.audio.speech.create({
+      model: "tts-1",
+      voice: "alloy",
+      input: text
+    });
+
+    const arrayBuffer = await mp3.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    // Set appropriate headers and return the audio file back to the client
+    res.set('Content-Type', 'audio/mp3');
+    res.send(buffer);
+  } catch (error) {
+    console.error("Error generating speech:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 
 // Initialize the assistant and start the server
 initializeAssistant()
