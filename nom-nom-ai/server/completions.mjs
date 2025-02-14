@@ -132,6 +132,81 @@ app.post('/api/chat', async (req, res) => {
 });
 
 
+
+// Send a message and get response
+app.post('/api/pdf', async (req, res) => {
+  try {
+    const { threadId, message } = req.body;
+
+    // Add the user's message to the thread
+    await openai.beta.threads.messages.create(threadId, {
+      role: "user",
+      content: "Here is the recipe I will be refering to: " + message
+    });
+
+    // Create a run
+    const run = await openai.beta.threads.runs.create(threadId, {
+      assistant_id: ASSISTANT_ID
+    });
+
+    // Poll for the run completion with exponential backoff
+    const maxRetries = 10;
+    let retryCount = 0;
+    let runStatus;
+
+    while (retryCount < maxRetries) {
+      runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id);
+      if (runStatus.status === 'completed') {
+        break;
+      } else if (runStatus.status === 'failed') {
+        throw new Error(`Assistant run failed: ${runStatus.last_error?.message || 'Unknown error'}`);
+      }
+
+      const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff
+      await new Promise(resolve => setTimeout(resolve, delay));
+      retryCount++;
+    }
+
+    if (retryCount === maxRetries) {
+      throw new Error('Max retries reached, request timed out');
+    }
+
+    // Get the messages (including the assistant's response)
+    const messages = await openai.beta.threads.messages.list(threadId);
+
+    // Get the latest assistant message
+    const assistantMessage = messages.data
+      .filter(msg => msg.role === 'assistant')
+      .shift();
+
+    if (!assistantMessage) {
+      throw new Error('No assistant response found');
+    }
+
+    res.json({
+      success: true,
+      response: assistantMessage.content[0].text.value
+    });
+
+  } catch (error) {
+    console.error('Error processing request:', error);
+
+    // Check if it's an OpenAI API error
+    if (error.response && error.response.data) {
+      console.error('OpenAI API Error:', error.response.data);
+    }
+
+    res.status(error.status || 500).json({
+      success: false,
+      error: error.message,
+      details: error.response?.data || 'No additional details available'
+    });
+  }
+});
+
+
+
+
 app.post('/api/voicetotext', upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {

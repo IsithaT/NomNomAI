@@ -1,35 +1,16 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { VoiceToTextService } from '../services/voice-to-text';
 
-const voiceService = new VoiceToTextService();
-
-export default function VoiceRecorder() {
+export default function VoiceRecorder({ threadId }) {
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [error, setError] = useState('');
   const [audio, setAudio] = useState(null);
-  // For simplicity, we use a single thread. In a production app, you may want to create a thread using /api/thread.
-  const [threadId, setThreadId] = useState(null);
 
-  // (Optional) Create a thread on mount if your chat endpoint requires one
-  useEffect(() => {
-    async function createThread() {
-      try {
-        const response = await fetch('http://localhost:3001/api/thread', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        const data = await response.json();
-        if (data.success) {
-          setThreadId(data.threadId);
-        }
-      } catch (err) {
-        console.error('Error creating thread:', err);
-      }
-    }
-    createThread();
-  }, []);
+  // Persist the service instance across renders
+  const voiceServiceRef = useRef(new VoiceToTextService());
+  const voiceService = voiceServiceRef.current;
 
   const handleVoiceRecording = async () => {
     try {
@@ -40,17 +21,21 @@ export default function VoiceRecorder() {
         // Stop recording and get the audio blob
         const audioBlob = await voiceService.stopRecording();
         setIsRecording(false);
-        
+
         // 1. Transcribe the recorded audio
         const userTranscript = await voiceService.transcribe(audioBlob);
         setTranscript(userTranscript);
+
+        if (!threadId) {
+          throw new Error('No thread available');
+        }
         
-        // 2. Add the user's message to the completion conversation and get the AI response
+        // 2. Send the transcript to chat
         const chatResponse = await fetch('http://localhost:3001/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            threadId: threadId, // ensure this thread exists or modify the endpoint to create one on the fly
+            threadId: threadId,
             message: userTranscript
           })
         });
@@ -58,11 +43,11 @@ export default function VoiceRecorder() {
         if (!chatResponse.ok) {
           throw new Error(chatData.error || 'Error getting chat response');
         }
-        
+
         const aiResponseText = chatData.response;
         setTranscript(aiResponseText);
-        
-        // 3. Generate speech (MP3) from the AI response text
+
+        // 3. Generate and play speech (MP3) from the AI response text
         const t2mp3Response = await fetch('http://localhost:3001/api/texttomp3', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -75,10 +60,9 @@ export default function VoiceRecorder() {
         const mp3Blob = await t2mp3Response.blob();
         const audioUrl = URL.createObjectURL(mp3Blob);
         
-        // 4. Play the generated audio automatically in the browser
-        const audio = new Audio(audioUrl);
-        setAudio(audio);
-        audio.play();
+        const newAudio = new Audio(audioUrl);
+        setAudio(newAudio);
+        newAudio.play();
       }
     } catch (err) {
       setError(err.message);
