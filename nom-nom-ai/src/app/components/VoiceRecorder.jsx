@@ -7,6 +7,7 @@ export default function VoiceRecorder({ threadId }) {
   const [transcript, setTranscript] = useState('');
   const [error, setError] = useState('');
   const [audio, setAudio] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   // Persist the service instance across renders
   const voiceServiceRef = useRef(new VoiceToTextService());
@@ -63,6 +64,7 @@ export default function VoiceRecorder({ threadId }) {
         const newAudio = new Audio(audioUrl);
         setAudio(newAudio);
         newAudio.play();
+        setIsPlaying(true);
       }
     } catch (err) {
       setError(err.message);
@@ -70,10 +72,14 @@ export default function VoiceRecorder({ threadId }) {
     }
   };
 
-  const handleStopAudio = () => {
+  const handleToggleAudio = () => {
     if (audio) {
-      audio.pause();
-      audio.currentTime = 0;
+      if (isPlaying) {
+        audio.pause();
+      } else {
+        audio.play();
+      }
+      setIsPlaying(!isPlaying);
     }
   };
 
@@ -88,10 +94,10 @@ export default function VoiceRecorder({ threadId }) {
       
       {audio && (
         <button 
-          onClick={handleStopAudio}
+          onClick={handleToggleAudio}
           className="bg-[#cf4343] text-white px-28 py-7 text-lg rounded-lg shadow-md hover:bg-red-600 font-bold transition mt-4"
         >
-          Stop Audio
+          {isPlaying ? 'Pause Audio' : 'Play'}
         </button>
       )}
 
