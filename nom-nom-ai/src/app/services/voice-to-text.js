@@ -38,6 +38,9 @@ export class VoiceToTextService {
     
     stopRecording = () => {
         return new Promise((resolve, reject) => {
+            if (!this.mediaRecorder) {
+                return reject(new Error("No active recording session."));
+            }
             try {
                 this.mediaRecorder.onstop = async () => {
                     const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
