@@ -31,7 +31,7 @@ NomNomAI is an AI-powered cooking assistant that speaks aloud to its user.
 In one terminal, paste:
    ```sh
    node .\server\completions.mjs
-
+   ```
 In another terminal, paste:
   ```sh
   npm run dev
