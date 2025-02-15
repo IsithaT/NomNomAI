@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./App.css";
 import VoiceRecorder from "./components/VoiceRecorder";
 import { getDocument } from "pdfjs-dist/webpack";
@@ -11,6 +11,7 @@ export default function Home() {
   const [pdfUrl, setPdfUrl] = useState(null);
   const [extractedText, setExtractedText] = useState("");
   const [threadId, setThreadId] = useState(null);
+  const fileInputRef = useRef(null);
 
   // Create a global thread on mount
   useEffect(() => {
@@ -81,6 +82,15 @@ export default function Home() {
     }
   };
 
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    setPdfUrl(null);
+    setExtractedText("");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   return (
     <section className="min-h-screen bg-[#fff88e] flex flex-col justify-center items-center py-10">
       <div className="flex flex-col items-center gap-6">
@@ -97,10 +107,19 @@ export default function Home() {
               type="file"
               accept="application/pdf"
               onChange={handleFileChange}
+              ref = {fileInputRef}
               className="border border-gray-400 p-2 rounded-md bg-white cursor-pointer"
             />
             {selectedFile && (
               <p className="text-gray-700 mt-2">Selected File: {selectedFile.name}</p>
+            )}
+            {selectedFile && (
+              <button
+                onClick={handleRemoveFile}
+                className="bg-[#cf4343] text-white px-4 py-2 mt-2 rounded-md shadow-md"
+              >
+                Remove File
+              </button>
             )}
           </div>
         </section>
