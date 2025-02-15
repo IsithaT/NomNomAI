@@ -85,45 +85,49 @@ export default function VoiceRecorder({ threadId }) {
   };
 
   return (
-    <div>
+    <div className="flex flex-col items-center justify-center min-h-screen">
+      {/* Voice Recording Button */}
       <button 
         onClick={handleVoiceRecording}
-        className="bg-[#437dcf] text-white px-28 py-7 text-lg rounded-lg shadow-md hover:bg-blue-600 font-bold transition"
+        className="bg-[#437dcf] text-white px-28 py-7 text-lg rounded-lg shadow-md hover:bg-blue-600 font-bold transition mx-auto"
       >
         {isRecording ? 'Stop Recording' : 'Start Recording'}
       </button>
       
+      {/* Audio Play/Pause Button */}
       {audio && (
         <button 
           onClick={handleToggleAudio}
-          className="bg-[#cf4343] text-white px-28 py-7 text-lg rounded-lg shadow-md hover:bg-red-600 font-bold transition mt-4"
+          className="bg-[#cf4343] text-white px-28 py-7 text-lg rounded-lg shadow-md hover:bg-red-600 font-bold transition mt-4 mx-auto"
         >
           {isPlaying ? 'Pause Audio' : 'Play'}
         </button>
       )}
-
-      {error && <p className="text-red-500 mt-2">{error}</p>}
+  
+      {/* Error Message */}
+      {error && <p className="text-red-500 mt-2 text-center">{error}</p>}
+  
+      {/* Transcript Output Box */}
       {transcript && (
-        <div className="mt-4 bg-white border border-[#437dcf] rounded-lg p-6 max-w-2xl shadow-lg overflow-y-auto max-h-96 text-[#437dcf] font-bold space-y-2 mx-auto">
-        <ReactMarkdown
-          components={{
-            p: ({ node, children }) => (
-              <p className="leading-relaxed">
-                {children}
-              </p>
-            ),
-            li: ({ node, children }) => (
-              <li className="ml-6 list-disc">{children}</li>
-            ),
-            strong: ({ node, children }) => (
-              <strong className="text-[#2b5ca8]">{children}</strong>
-            ),
-          }}
-        >
-          {transcript}
-        </ReactMarkdown>
-      </div>
+        <div className="mt-6 bg-white border border-[#437dcf] rounded-lg p-8 w-[80%] max-w-3xl shadow-lg overflow-y-auto max-h-96 text-[#437dcf] font-bold space-y-2 mx-auto text-center">
+          <ReactMarkdown
+            components={{
+              p: ({ node, children }) => (
+                <p className="leading-relaxed">{children}</p>
+              ),
+              li: ({ node, children }) => (
+                <li className="ml-6 list-disc">{children}</li>
+              ),
+              strong: ({ node, children }) => (
+                <strong className="text-[#2b5ca8]">{children}</strong>
+              ),
+            }}
+          >
+            {transcript}
+          </ReactMarkdown>
+        </div>
       )}
     </div>
   );
+  
 }
