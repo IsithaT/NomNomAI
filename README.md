@@ -35,3 +35,7 @@ In one terminal, paste:
 In another terminal, paste:
   ```sh
   npm run dev
+   ```
+## Disclaimer
+
+Note: This website uses data from OpenAI API and may not always be accurate. Be sure to double check your information
